@@ -19,6 +19,8 @@ import flowers from "./images/flowers.jpg";
 import intro from "./audio/intro.mp3";
 
 var slideIndex = 1;
+var slidesRead = 1;
+
 export class App extends Component {
   constructor(props) {
     super();
@@ -29,10 +31,18 @@ export class App extends Component {
     this.showSlides(slideIndex);
   }
 
+  clickSlide(n) {
+    if (n <= slidesRead) {
+      slideIndex = n;
+      this.showSlides(n);
+    }
+  }
+
   showSlides(n) {
     if (document.getElementById("book")) {
       var i;
       var slides = Array.from(document.getElementsByClassName("slide"));
+      document.getElementById("pageNum").innerHTML = String(n - 1);
       if (n > slides.length) {
         slideIndex = 1;
       }
@@ -42,26 +52,40 @@ export class App extends Component {
       for (i = 0; i < slides.length; i++) {
         slides[i].style.display = "none";
       }
-      slides[slideIndex - 1].style.display = "flex";
+      slides[n - 1].style.display = "flex";
+      if (slideIndex == 1) {
+        document.getElementById("pageNum").innerHTML = "";
+      }
+      if (slideIndex == slidesRead) {
+        document.getElementById("n").style.display = "none";
+      } else {
+        document.getElementById("n").style.display = "block";
+      }
+      if (slideIndex >= 2) {
+        document.getElementById("p").style.display = "block";
+      } else {
+        document.getElementById("p").style.display = "none";
+      }
     }
   }
 
   plusSlides(n) {
     if (document.getElementById("pageNum")) {
-      this.showSlides((slideIndex += n));
+      slideIndex += n;
+      slidesRead = Math.max(slidesRead, slideIndex);
+      this.showSlides(slideIndex);
       document.getElementById("pageNum").innerHTML = String(slideIndex - 1);
-      if (slideIndex == 1) {
-        document.getElementById("pageNum").innerHTML = "";
-      }
-      if (n > 0) {
-        //document.getElementById("n").style.display = "none";
+      document.getElementById(`dot${slideIndex}`).classList.add("activeDot");
+    }
+  }
+
+  toggleBlock(id) {
+    if (document.getElementById(id)) {
+      var text = document.getElementById(id).style.display;
+      if (text == "flex") {
+        document.getElementById(id).style.display = "none";
       } else {
-        document.getElementById("n").style.display = "block";
-      }
-      if (slideIndex >= 3) {
-        document.getElementById("p").style.display = "block";
-      } else {
-        //document.getElementById("p").style.display = "none";
+        document.getElementById(id).style.display = "block";
       }
     }
   }
@@ -73,17 +97,6 @@ export class App extends Component {
         document.getElementById(id).style.display = "none";
       } else {
         document.getElementById(id).style.display = "flex";
-      }
-    }
-  }
-
-  toggleBlock(id) {
-    if (document.getElementById(id)) {
-      var text = document.getElementById(id).style.display;
-      if (text == "flex") {
-        document.getElementById(id).style.display = "none";
-      } else {
-        document.getElementById(id).style.display = "block";
       }
     }
   }
@@ -148,9 +161,9 @@ export class App extends Component {
     }
   }
 
-  selectOption(id, num) {
+  selectOption(id, num, choiceLength) {
     var options = ["a", "b", "c"];
-    for (var i = 0; i < options.length; i++) {
+    for (var i = 0; i < choiceLength; i++) {
       var optionId = num + options[i];
       document.getElementById(optionId).style.fontWeight = "normal";
     }
@@ -168,6 +181,7 @@ export class App extends Component {
   }
 
   render() {
+    const totalSlides = 13;
     return (
       <div id="book">
         {/* Slideshow container */}
@@ -189,35 +203,31 @@ export class App extends Component {
                 <img className="image" src={image01} alt="Intro page image" />
                 <div className="avatar-container">
                   <div className="flex-row">
-                    <img
-                      className="avatar"
-                      src={avatar}
-                      alt="Owl avatar"
-                      onClick={() => {
-                        this.show("intro");
-                        this.hide("click1");
-                        this.showNext();
-                      }}
-                    />
-                    <i id="click1" class="fa fa-arrow-left">
-                      &larr;Click Here
-                    </i>
+                    <img className="avatar" src={avatar} alt="Owl avatar" />
+                  </div>
+                  <input className="nameInput" placeholder="Enter Name" />
+                  <div
+                    className="begin-button"
+                    onClick={() => {
+                      this.show("intro");
+                      this.showNext();
+                    }}
+                  >
+                    Press to Begin
                   </div>
                 </div>
                 <div id="intro" className="speech sb1">
-                  You will read the story "The Woman and her Bear." This story
-                  is a folktale told by the Inuit. A folktale is a traditional
-                  story that is passed down from one generation to another by
-                  word of mouth. Folktales usually explain something. Often
-                  folktales are a way for older people to teach young people how
-                  to behave in their local community. The Inuit homeland is
-                  known as Inuit Nunangat, meaning the land, ice, and water in
-                  the Artic regions that we call Alaska, Yukon, Northwest
-                  Territory, Nunavut including Baffin Island, and Greenland.
+                  Welcome, my name is Whoo! You will read the story "The Woman
+                  and Her Bear." This story is a folktale told by the Inuit. A
+                  folktale is a traditional story that is passed down from one
+                  generation to another by word of mouth. Folktales usually
+                  explain something. Often folktales are a way for older people
+                  to teach young people how to behave in their local community.
+                  The Inuit homeland is known as Inuit Nunangat, meaning the
+                  land, ice, and water in the Arctic regions that we call
+                  Alaska, Yukon, Northwest Territory, Nunavut including Baffin
+                  Island, and Greenland.
                 </div>
-                <audio id="intro-sound">
-                  <source src={intro} type="audio/mpeg" />
-                </audio>
               </div>
             </div>
             {/* Slide 1 */}
@@ -243,13 +253,13 @@ export class App extends Component {
                         this.showNext();
                       }}
                     >
-                      Done
+                      Done ✓
                     </span>
                   </p>
                   <div id="s1" className="speech2">
-                    Notice that the Inuit live in igloos in winter. An igloo is
-                    a dome-shaped dwelling made from ice because there are no
-                    trees to make house from.
+                    Notice that the Inuit live in igloos in the winter. An igloo
+                    is a dome-shaped dwelling made from ice. Why did they make
+                    their homes from ice? Do you think it is warm inside?
                   </div>
                 </div>
               </div>
@@ -260,16 +270,7 @@ export class App extends Component {
                 <img className="image" src={image02} alt="Second page image" />
                 <div className="avatar-container">
                   <div className="flex-row">
-                    <img
-                      className="avatar"
-                      src={avatar}
-                      alt="Owl avatar"
-                      onClick={() => {
-                        this.showNext();
-                        this.hide("click3");
-                        this.toggle("s2");
-                      }}
-                    />
+                    <img className="avatar" src={avatar} alt="Owl avatar" />
                   </div>
                   <p>
                     One old woman lived alone. She had no husband and no sons to
@@ -278,6 +279,17 @@ export class App extends Component {
                     She often walked along the{" "}
                     <span className="highlight">shore</span>, looking far out to
                     sea, praying that the gods might send her a son.
+                    <span
+                      className="doneButton"
+                      id="done2"
+                      onClick={() => {
+                        this.toggle("s2");
+                        this.hide("done2");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s2" className="dictionary">
                     <span className="bold">shore(noun):</span> The land along
@@ -292,16 +304,7 @@ export class App extends Component {
                 <img className="image" src={image03} alt="Third page image" />
                 <div className="avatar-container">
                   <div className="flex-row">
-                    <img
-                      className="avatar"
-                      src={avatar}
-                      alt="Owl avatar"
-                      onClick={() => {
-                        this.showNext();
-                        this.hide("click4");
-                        this.toggle("s3");
-                      }}
-                    />
+                    <img className="avatar" src={avatar} alt="Owl avatar" />
                   </div>
                   <p>
                     One cold winter day, the woman was walking by the sea when
@@ -311,6 +314,17 @@ export class App extends Component {
                     said softly, and she walked onto the ice, picked up the cub
                     and looked into his eyes. "You will be my son," she said.
                     She called him Kunik.
+                    <span
+                      className="doneButton"
+                      id="done3"
+                      onClick={() => {
+                        this.toggle("s3");
+                        this.hide("done3");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s3" className="multiple">
                     Look again at the story. What does the word spotted mean in
@@ -318,21 +332,21 @@ export class App extends Component {
                     <div
                       className="choice"
                       id="3a"
-                      onClick={() => this.selectOption("3a", 3)}
+                      onClick={() => this.selectOption("3a", 3, 3)}
                     >
                       (a) The bear was white with dark spots on his fur.
                     </div>
                     <div
                       className="choice"
                       id="3b"
-                      onClick={() => this.selectOption("3b", 3)}
+                      onClick={() => this.selectOption("3b", 3, 3)}
                     >
                       (b) The old woman noticed the bear.{" "}
                     </div>
                     <div
                       className="choice"
                       id="3c"
-                      onClick={() => this.selectOption("3c", 3)}
+                      onClick={() => this.selectOption("3c", 3, 3)}
                     >
                       (c) The bear's bright white fur looked speckled in the
                       sun.
@@ -347,21 +361,23 @@ export class App extends Component {
                 <img className="image" src={image04} alt="Fourth page image" />
                 <div className="avatar-container">
                   <div className="flex-row">
-                    <img
-                      className="avatar"
-                      src={avatar}
-                      alt="Owl avatar"
-                      onClick={() => {
-                        this.showNext();
-                        this.hide("click5");
-                        this.toggle("s4");
-                      }}
-                    />
+                    <img className="avatar" src={avatar} alt="Owl avatar" />
                   </div>
                   <p>
                     The old woman took her cub back to her home. From that day
                     on, she <span className="highlight">shared</span> all her
                     food with Kunik, and a strong bond grew between the two.
+                    <span
+                      className="doneButton"
+                      id="done4"
+                      onClick={() => {
+                        this.toggle("s4");
+                        this.hide("done4");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s4" className="speech2">
                     Do you share food with anyone in your family? A pet or a
@@ -375,15 +391,7 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image05} alt="Fifth page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggle("s5");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
                     The village children loved Kunik, too. Now the woman was
                     never <span className="highlight">lonely</span>, for her
@@ -392,27 +400,38 @@ export class App extends Component {
                     the children rolled in the snow and slid on the ice. Kunik
                     was gentle with the children as if they were his brothers
                     and sisters.
+                    <span
+                      className="doneButton"
+                      id="done5"
+                      onClick={() => {
+                        this.toggle("s5");
+                        this.hide("done5");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s5" className="multiple">
                     Why is the woman not lonely?
                     <div
                       className="choice"
                       id="5a"
-                      onClick={() => this.selectOption("5a", 5)}
+                      onClick={() => this.selectOption("5a", 5, 3)}
                     >
                       (a) She plays with the bear in the snow.
                     </div>
                     <div
                       className="choice"
                       id="5b"
-                      onClick={() => this.selectOption("5b", 5)}
+                      onClick={() => this.selectOption("5b", 5, 3)}
                     >
                       (b) The bear and the children entertain her all day.
                     </div>
                     <div
                       className="choice"
                       id="5c"
-                      onClick={() => this.selectOption("5c", 5)}
+                      onClick={() => this.selectOption("5c", 5, 3)}
                     >
                       (c) Kunik is gentle with the children.
                     </div>
@@ -425,17 +444,9 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image06} alt="Sixth page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggle("s6");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
-                    Kunk grew taller and smarter. The children taught him to
+                    Kuink grew taller and smarter. The children taught him to
                     fish. By springtime he was fishing on his own, and every
                     afternoon he came home carrying fresh salmon for his mother.
                     The old woman was now the happiest of all the villagers. She
@@ -443,6 +454,17 @@ export class App extends Component {
                     little bear that whenever he returned home, she would say
                     proudly to anyone nearby, "He's the finest fisher in all the
                     village."
+                    <span
+                      className="doneButton"
+                      id="done6"
+                      onClick={() => {
+                        this.toggle("s6");
+                        this.hide("done6");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s6" className="speech2">
                     The old woman is proud of Kunik's fishing skills. What can
@@ -456,15 +478,7 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image07} alt="Seventh page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggle("s7");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
                     Before long the men began to began to feel{" "}
                     <span className="highlight">envious</span>. "What will we
@@ -474,6 +488,17 @@ export class App extends Component {
                     to our families." The men decided to kill the bear. Although
                     they knew how much the old woman loved the bear, their envy
                     made them mean.
+                    <span
+                      className="doneButton"
+                      id="done7"
+                      onClick={() => {
+                        this.toggle("s7");
+                        this.hide("done7");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s7" className="multiple">
                     Select the word that is a synonym for envious:
@@ -507,15 +532,7 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image08} alt="Eight page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggle("s8");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
                     A little boy overheard the men talking. He ran to the old
                     woman's home to tell her of the terrible plan. When she
@@ -525,6 +542,17 @@ export class App extends Component {
                     every igloo in the village. She begged each man not to kill
                     her beautiful bear. "He is a danger to our children," they
                     said. "We cannot let him live."
+                    <span
+                      className="doneButton"
+                      id="done8"
+                      onClick={() => {
+                        this.toggle("s8");
+                        this.hide("done8");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s8" className="speech2">
                     The old woman is weeping because she is afraid for Kunik.
@@ -538,21 +566,24 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image09} alt="Ninth page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggleBlock("s9");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
                     The old woman ran home and said to Kunik, "Your life is in
                     danger. Run away, but don't go so far that I cannot find
                     you." He had tears in his eyes but he{" "}
                     <span className="highlight">obeyed</span> his mother's
                     wishes.
+                    <span
+                      className="doneButton"
+                      id="done9"
+                      onClick={() => {
+                        this.toggleBlock("s9");
+                        this.hide("done9");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s9" className="speech2">
                     Kunik obeyed his mother's wishes. Fill in the blank in this
@@ -568,15 +599,7 @@ export class App extends Component {
               <div className="image-container">
                 <img className="image" src={image10} alt="Tenth page image" />
                 <div className="avatar-container">
-                  <img
-                    className="avatar"
-                    src={avatar}
-                    alt="Owl avatar"
-                    onClick={() => {
-                      this.showNext();
-                      this.toggle("s10");
-                    }}
-                  />
+                  <img className="avatar" src={avatar} alt="Owl avatar" />
                   <p>
                     For many days the old woman and the children grieved their
                     loss. And then one morning the old woman went out looking
@@ -587,6 +610,17 @@ export class App extends Component {
                     gave her son the best slices of blubber and carried the rest
                     home. Every day after that the old woman met her son. The
                     bear brought his mother fresh meat or fish.
+                    <span
+                      className="doneButton"
+                      id="done10"
+                      onClick={() => {
+                        this.toggle("s10");
+                        this.hide("done10");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
                   <div id="s10" className="multiple">
                     Kunik brought food for his mother because he loves her.
@@ -624,18 +658,48 @@ export class App extends Component {
                     between the woman and the bear was strong and true. From
                     that point on, they told with pride and respect the tale of
                     the unbroken love between the old woman and her son.
+                    <span
+                      className="doneButton"
+                      id="done11"
+                      onClick={() => {
+                        this.toggle("s11");
+                        this.hide("done11");
+                        this.showNext();
+                      }}
+                    >
+                      Done ✓
+                    </span>
                   </p>
-                  <div id="s11" className="speech2">
-                    Make sentences to show what happened first and what happened
-                    next. [show scrambled list of phrases to fill in the blanks]
-                    First the woman found the bear and then she was not lonely
-                    any more.First Kunik was small and then he became taller and
-                    smarter.First the woman shared her food with Kunik and then
-                    he brought her the biggest salmon.First the men were envious
-                    and afraid of Kunik and then they were proud and respected
-                    him.{" "}
+                  <div id="s11" className="multiple">
+                    At the end of the story the men have changed their mind
+                    about the bear. Click on the sentence that explains why they
+                    feel differently about Kunik:
+                    <div
+                      className="choice"
+                      id="11a"
+                      onClick={() => this.selectOption("11a", 11, 2)}
+                    >
+                      (a) Kunik showed that he was the best hunter of seal after
+                      all.
+                    </div>
+                    <div
+                      className="choice"
+                      id="11b"
+                      onClick={() => this.selectOption("11b", 11, 2)}
+                    >
+                      (b) Kunik continued to provide food for the old woman who
+                      cut it up and shared it between them.
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Slide 12 */}
+            <div className="slide fade">
+              <div className="endContainer">
+                <div className="endText">The End</div>
+                <div className="endText">Thank you for reading!</div>
               </div>
             </div>
 
@@ -648,6 +712,19 @@ export class App extends Component {
 
           <div className="pageNum-container">
             <p id="pageNum"></p>
+          </div>
+          <div className="dotsContainer">
+            {Array.from(Array(totalSlides), (e, i) => {
+              return (
+                <div
+                  className={`dot ${i == 0 ? "activeDot" : ""}`}
+                  id={`dot${i + 1}`}
+                  onClick={() => {
+                    this.clickSlide(i + 1);
+                  }}
+                ></div>
+              );
+            })}
           </div>
         </div>
       </div>
